@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/survey.css') }}">
+
+<div class="survey-container">
+    <div class="progress-bar">
+        <div class="progress"></div>
+    </div>
+
+    <div id="questionsContainer">
+        <!-- Pytania będą wstrzykiwane przez JS -->
+    </div>
+
+    <div class="navigation-buttons">
+        <button id="prevBtn" class="nav-btn" disabled>← Poprzednie</button>
+        <span id="currentQuestion">1/10</span>
+        <button id="nextBtn" class="nav-btn">Dalej →</button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/survey.js') }}"></script>
+{% endblock %}

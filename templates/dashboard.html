@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+<div class="dashboard-container animate-fade-in">
+    <h1 class="user-greeting">👋 Witaj, {{ current_user.username }}!</h1>
+
+    <div class="actions-grid">
+        <!-- Karta Ankiety -->
+        <div class="action-card primary" onclick="window.location.href='/survey'">
+            <h2>📝 Nowa Ankieta</h2>
+            <p>Rozpocznij nową ankietę i zapisz swoje odpowiedzi</p>
+            <div class="btn-survey">Rozpocznij →</div>
+        </div>
+
+        <!-- Karta Profilu -->
+        <div class="action-card" onclick="window.location.href='/profile'">
+            <h2>👤 Twój Profil</h2>
+            <p>Zobacz i edytuj swoje dane konta</p>
+        </div>
+
+        <!-- Karta Wylogowania -->
+        <div class="action-card danger" id="logoutBtn">
+            <h2>🚪 Wyloguj się</h2>
+            <p>Zakończ obecną sesję</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Obsługa wylogowania
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    const response = await fetch('/api/logout', { method: 'POST' });
+    const data = await response.json();
+    if (data.redirect) {
+        window.location.href = data.redirect;
+    }
+});
+</script>
+{% endblock %}
