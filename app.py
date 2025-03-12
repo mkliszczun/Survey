@@ -1,4 +1,5 @@
-from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required
+from datetime import datetime
+from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -120,11 +121,41 @@ def get_questions():
 @app.route('/api/submit-survey', methods=['POST'])
 @login_required
 def submit_survey():
-    data = request.get_json()
-    # Tutaj później dodamy logikę zapisywania do bazy
-    print(f"Otrzymane odpowiedzi: {data}")
-    return jsonify({"success": True})
+    try:
+        data = request.get_json()
 
+        for question_id, answer in data.items():
+            new_answer = Answer(
+                user_id=current_user.id,
+                question_id=int(question_id.replace('q', '')),  # np. "q2" → 2
+                answer_text=str(answer)
+            )
+            db.session.add(new_answer)
+
+        db.session.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/debug/answers') #for retrieving saved answers
+@login_required
+def debug_answers():
+    answers = Answer.query.filter_by(user_id=current_user.id).all()
+    return jsonify([{
+        'question_id': a.question_id,
+        'answer': a.answer_text
+    } for a in answers])
+
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    question_id = db.Column(db.Integer, nullable=False)
+    answer_text = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('answers', lazy=True))
 
 if __name__ == '__main__':
     app.run(debug=True)
