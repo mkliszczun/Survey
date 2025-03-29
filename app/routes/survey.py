@@ -8,16 +8,64 @@ bp = Blueprint('survey', __name__)
 QUESTIONS = [
     {
         "id": 1,
-        "text": "Jak często uprawiasz sport?",
+        "text": "Ile godzin dzisiaj spałeś(-aś)?",
         "type": "radio",
-        "options": ["Codziennie", "Kilka razy w tygodniu", "Raz w miesiącu", "Nigdy"]
+        "options": ["4-5", "5-6", "7", "8", "9-10"]
     },
     {
         "id": 2,
-        "text": "Ulubiony rodzaj książek:",
-        "type": "text"
+        "text": "Jak wyglądał Twój poziom aktywności fizycznej dzisiaj?",
+        "type": "radio",
+        "options": ["brak", "lekka", "umiarkowana", "instensywna"]
     },
-    # + 8 questions soon
+    {
+        "id":3,
+        "text": "W jaki sposób się dzisiaj odżywiałeś(-aś)",
+        "type": "radio",
+        "options": ["niezdrowo", "umiarkowanie niezdrowo", "umiarkowanie zdrowo", "zdrowo"]
+    },
+    {
+        "id": 4,
+        "text": "Jak często w ciągu dnia miałeś(-aś) interakcje z innymi ludźmi?",
+        "type": "radio",
+        "options": ["brak", "sporadycznie", "umiarkowanie", "instensywnie"]
+    },
+    {
+        "id": 5,
+        "text": "Ile miałeś dzisiaj czasu na relaks?",
+        "type": "radio",
+        "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
+    },
+    {
+        "id": 6,
+        "text": "Jak dużo czasu spędziłeś(aś) dzisiaj na świeżym powietrzu?",
+        "type": "radio",
+        "options": ["brak", "10-30 min", "30-60 min", "więcej niż 1h"]
+    },
+    {
+        "id": 7,
+        "text": "Ile czasu byłeś(-aś) dzisiaj poza domem?",
+        "type": "radio",
+        "options": ["brak", "mniej niż 1h", "1-8 h", "więcej niż 8 h"]
+    },
+    {
+        "id": 8,
+        "text": "Ile miałeś dzisiaj czasu na relaks?",
+        "type": "radio",
+        "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
+    },
+    {
+        "id": 9,
+        "text": "Ile posiłków dzisiaj jadłeś?",
+        "type": "radio",
+        "options": ["2", "3", "4", "5"]
+    },
+    {
+        "id": 10,
+        "text": "Jak oceniach twoje samopoczucie dzisiejszego dnia?",
+        "type": "radio",
+        "options": ["fatalne", "słabe", "dobre", "bardzo dobre"]
+    }
 ]
 
 @bp.route('/survey')
