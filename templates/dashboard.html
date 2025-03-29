@@ -20,6 +20,15 @@
             <p>Zobacz i edytuj swoje dane konta</p>
         </div>
 
+        <!-- Karta Admina (widoczna tylko dla adminów) -->
+        {% if current_user.role == 'admin' %}
+        <div class="action-card admin" onclick="window.location.href='/admin/'">
+            <h2>🛠 Panel Admina</h2>
+            <p>Zarządzanie użytkownikami i statystykami</p>
+            <div class="btn-survey">Przejdź →</div>
+        </div>
+        {% endif %}
+
         <!-- Karta Wylogowania -->
         <div class="action-card danger" id="logoutBtn">
             <h2>🚪 Wyloguj się</h2>

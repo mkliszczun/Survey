@@ -73,3 +73,12 @@
 .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
 }
+
+.action-card.admin {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+}
+
+.action-card.admin:hover {
+    background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+}
