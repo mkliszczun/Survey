@@ -32,18 +32,12 @@ def create_user_in_db(init_database):
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         user = User(username=username, password=hashed_password, email = email, role=role)
         _db.session.add(user)
-        _db.session.commit() # Commit, aby uzyskać ID użytkownika dla sesji
+        _db.session.commit()
         created_users.append(user)
         return user
 
     yield _create_user
 
-    # Opcjonalne czyszczenie, chociaż init_database powinno wystarczyć
-    # for user in created_users:
-    #     _db.session.delete(user)
-    # _db.session.commit()
-
 def login_user_for_test(client, user):
-    """Pomocnik do logowania użytkownika w kontekście testowym."""
     with client.session_transaction():
         flask_login.login_user(user)
