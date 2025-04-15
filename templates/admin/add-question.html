@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj Nowe Pytanie - Panel Admina</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Dodaj Nowe Pytanie</h1>
+
+        <div id="message-area" class="message-area"></div>
+
+        <form id="add-question-form">
+            <div class="form-group">
+                <label for="question_content">Treść pytania:</label>
+                <textarea id="question_content" name="question_content" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="question_type">Typ pytania:</label>
+                <select id="question_type" name="question_type" required>
+                    <option value="" disabled selected>-- Wybierz typ --</option>
+                    <option value="choice">Wielokrotny wybór (Choice)</option>
+                    <option value="write">Odpowiedź pisemna (Write)</option>
+                </select>
+            </div>
+
+            <div id="answers-section" class="form-group answers-section" style="display: none;">
+                <label>Możliwe odpowiedzi:</label>
+                <div id="answers-container">
+                    <div class="answer-input-group">
+                        <input type="text" name="answers[]" class="answer-input" placeholder="Treść odpowiedzi">
+                        <button type="button" class="remove-answer-btn" title="Usuń odpowiedź">&times;</button>
+                    </div>
+                </div>
+                <button type="button" id="add-answer-btn" class="btn btn-secondary">Dodaj kolejną odpowiedź</button>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Dodaj Pytanie</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_add_question.js') }}"></script>
+</body>
+</html>
