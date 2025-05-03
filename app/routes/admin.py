@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
-from sqlalchemy import Nullable
+from sqlalchemy import Nullable, inspect
 
 from ..extensions import db
 from app.models import Question, Choice
@@ -38,6 +38,7 @@ def add_question():
 
             return jsonify({'success': False, 'message': 'invalid question type question not added'}), 400
 
+# ------------Validation------------
         if new_question.question_type == 'choice':
 
             for answer in data['choices']:
@@ -49,8 +50,21 @@ def add_question():
                 db.session.commit()
                 return jsonify({'success': True, 'message': 'Question Added'}),201
 
-            except:
+            except Exception as e:
                 db.session.rollback()
+                print(e)
+                try:
+                    inspector = inspect(db.engine)
+                    for table_name in inspector.get_table_names():
+                        print(f"\nTabela: {table_name}")
+                        columns = inspector.get_columns(table_name)
+                        for column in columns:
+                            col_str = f"  - {column['name']} ({column['type']})"
+                            if column.get('primary_key'):
+                                col_str += " PRIMARY KEY"
+                            print(col_str)
+                except Exception as inspect_error:
+                    print("Nie udało się pobrać struktury bazy danych:", inspect_error)
                 return  jsonify({'success': False, 'message': 'something went wrong - question not added'}),500
 
         if new_question.question_type == 'write':
@@ -59,6 +73,7 @@ def add_question():
                 db.session.commit()
                 return jsonify({'success': True, 'message': 'Question Added'}),201
 
-            except:
+            except Exception as e:
                 db.session.rollback()
+                print(e)
                 return jsonify({'success': False, 'message': 'something went wrong - question not added'}),500

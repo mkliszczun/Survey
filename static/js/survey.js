@@ -22,7 +22,7 @@ function renderQuestion(index) {
     const question = questions[index];
     const questionHTML = `
         <div class="question-card ${index === 0 ? 'active' : ''}">
-            <div class="question-text">${question.text}</div>
+            <div class="question-text">${question.question_content}</div>
             ${renderQuestionInput(question)}
         </div>
     `;
@@ -34,14 +34,14 @@ function renderQuestion(index) {
         activeQuestion.classList.add('active');
     });
 }
-
+// TODO tu może być problem, bo zwraca stringi, a nie obiekty, problem może pojawić się przy zapisie pytań
 function renderQuestionInput(question) {
-    if (question.type === 'radio') {
+    if (question.question_type === 'choice') {
         return `<div class="radio-group">${
-            question.options.map(opt => `
+            question.choices.map(choice => `
                 <label class="radio-option">
-                    <input type="radio" name="q${question.id}" value="${opt}">
-                    ${opt}
+                    <input type="radio" name="q${question.id}" value="${choice}">
+                    ${choice}
                 </label>`
         ).join('')}</div>`;
     }
