@@ -1,8 +1,10 @@
+from datetime import date
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import not_
 
-from ..models import Answer, Question, QuestionRating
+from ..models import Answer, Question, QuestionRating, Survey, Choice
 from ..extensions import db
 
 bp = Blueprint('survey', __name__)
@@ -83,7 +85,7 @@ def survey():
 # 2 global highest rank questions
 @bp.route('/api/questions')
 @login_required
-def get_questions():
+def get_questions(): # TODO returns 4 questions for now
 
     QUESTION_ABOUT_FEELING_ID = 1
 
@@ -125,27 +127,37 @@ def get_questions():
         'question_content': q.question_content,
         'question_type': q.question_type,
         'global_rating': q.global_rating,
-        'choices': [c.answer_content for c in q.choices]
+        #'choices': [c.answer_content for c in q.choices]
+        'choices': [
+        {
+            'id': c.id,
+            'answer_content': c.answer_content
+        } for c in q.choices]
     } for q in questions_to_return])
 
-# TODO - change submit survey for the new model
+# TODO - change submit survey for the new model, post from frontend gives 500 response
 @bp.route('/api/submit-survey', methods=['POST'])
 @login_required
 def submit_survey():
     try:
         data = request.get_json()
+        user_id = current_user.id
+        choice_ids = list(choice['id'] for choice in data)
 
-        for question_id, answer in data.items():
-            new_answer = Answer(
-                user_id=current_user.id,
-                question_id=int(question_id.replace('q', '')),  # np. "q2" → 2
-                answer_text=str(answer)
-            )
-            db.session.add(new_answer)
+        choices = list(Choice.query.filter(Choice.id.in_(choice_ids)))
 
+        if len(choices) != len(choice_ids): #check if all ids found
+            found_ids = {c.id for c in choices}
+            missing_ids = [cid for cid in choice_ids if cid not in found_ids]
+            raise ValueError(f"Choices not found for IDs: {missing_ids}")
+
+
+        survey_to_save = Survey(owner_id = user_id, submission_date = date.today(), choices = choices)
+        db.session.add(survey_to_save)
         db.session.commit()
-        return jsonify({"success": True})
+        return jsonify({"success": True}), 200
 
     except Exception as e:
         db.session.rollback()
+        print(e)
         return jsonify({"success": False, "error": str(e)}), 500

@@ -1,14 +1,61 @@
 from sqlalchemy import text
+from sqlalchemy.orm import joinedload
 from wtforms.validators import equal_to
 
-from app.models import Question, QuestionRating, Choice
-from tests.conftest import test_client, login_user_for_test
+from app.models import Question, QuestionRating, Choice, Survey, User
+from tests.conftest import test_client, login_user_for_test, create_user_in_db
 from app.extensions import db
 from flask_login import current_user
 
 def test_get_questions_auth(test_client, init_database):
     response = test_client.get('/api/questions')
     assert response.status_code != 200
+
+def test_submit_survey(test_client, init_database, create_user_in_db):
+    user = create_user_in_db('testuser', 'password123', email = "testusermail@mail.com", role='user')
+    login_user_for_test(test_client, user)
+
+    saved_survey = Survey.query.first()
+    assert saved_survey is None #check if db doesn't contain any other surveys - because it
+                                # will take the first one
+    data = [        # simulation of the data recived from frontend
+        {"id": 2},
+        {"id": 5},
+        {"id": 9},
+        {"id": 11},
+        {"id": 19},
+        {"id": 23},
+        {"id": 26},
+        {"id": 30},
+        {"id": 35},
+        {"id": 39}
+    ]
+
+    for idx, item in enumerate(data):
+        choice = Choice(
+            id=item["id"],
+            question_id=idx + 1,
+            answer_content=f"Sample answer {idx + 1}"
+        )
+        db.session.add(choice)
+
+    db.session.flush()
+
+    response = test_client.post('/api/submit-survey', json = data)
+    print(response.get_json())
+    assert response.status_code == 200
+    assert response.get_json()['success'] == True
+
+    saved_survey = Survey.query.options(joinedload(Survey.choices)).first()
+    assert saved_survey is not None
+    assert saved_survey.owner_id == User.query.filter_by(username = 'testuser').first().id
+    assert len(saved_survey.choices) == 10
+
+    # Cleanup at the end of test because data jumps to the other test
+    Choice.query.delete()
+    Question.query.delete()
+    Survey.query.delete()
+    db.session.commit()
 
 def test_get_questions(test_client, init_database, create_user_in_db):
     user = create_user_in_db('UserForTest', 'password123', email = 'testuseremail@mail.com', role = 'user')
@@ -138,7 +185,7 @@ def test_get_questions(test_client, init_database, create_user_in_db):
     ]
 
     db.session.bulk_save_objects(questions)
-    db.session.commit()
+    db.session.flush()
     cur_user_id = user.id
 
     ratings = [
@@ -175,7 +222,7 @@ def test_get_questions(test_client, init_database, create_user_in_db):
     ]
 
     db.session.bulk_save_objects(ratings)
-    db.session.commit()
+    db.session.flush()
 
     response = test_client.get('/api/questions')
 

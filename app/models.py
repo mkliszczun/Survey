@@ -26,7 +26,6 @@ class Answer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable = False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id') , nullable=False)
-    answer_text = db.Column(db.Text, nullable=False)
 
 class Question(db.Model):
     __tablename__ = 'question'
@@ -41,13 +40,14 @@ class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     answer_content = db.Column(db.String(50), nullable = False)
+    surveys = db.Column(db.Integer, db.ForeignKey('survey.id'))
 
 class Survey(db.Model):
     __tablename__ = 'survey'
     id = db.Column(db.Integer, primary_key = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     submission_date = db.Column(db.Integer, nullable = False)
-    answers = db.relationship('Answer', backref = 'survey')
+    choices = db.relationship('Choice')
 
 class QuestionRating(db.Model):
     __tablename__ = 'question_rating'

@@ -40,11 +40,11 @@ function renderQuestionInput(question) {
         return `<div class="radio-group">${
             question.choices.map(choice => `
                 <label class="radio-option">
-                    <input type="radio" name="q${question.id}" value="${choice}">
-                    ${choice}
+                    <input type="radio" name="q${question.id}" value="${choice.id}">
+                    ${choice.answer_content}
                 </label>`
         ).join('')}</div>`;
-    }
+    } // TODO - if anyth. remove .id in this line and answer_content from here
     return `<textarea class="text-answer" name="q${question.id}"></textarea>`;
 }
 
@@ -94,10 +94,12 @@ function updateProgress() {
 
 async function submitSurvey() {
     try {
+        const formattedAnswers = Object.values(answers).map(id => ({id: parseInt(id)}));
+
         await fetch('/api/submit-survey', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(answers)
+            body: JSON.stringify(formattedAnswers)
         });
         window.location.href = '/dashboard';
     } catch (error) {
