@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const path = link.getAttribute('href');
 
         // Tymczasowa obsługa nieistniejących stron
-        const existingPaths = ['/admin/questions', '/admin/surveys'];
+        const existingPaths = ['/admin/question_list', '/admin/survey_list'];
         if (!existingPaths.includes(path)) {
             event.preventDefault();
             showErrorToast('Ta funkcja jest w trakcie implementacji');
