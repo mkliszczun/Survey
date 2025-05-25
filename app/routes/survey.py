@@ -1,100 +1,117 @@
+from datetime import date
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
-from ..models import Answer
+from sqlalchemy import not_
+
+from ..models import Answer, Question, QuestionRating, Survey, Choice
 from ..extensions import db
 
 bp = Blueprint('survey', __name__)
-
-QUESTIONS = [
-    {
-        "id": 1,
-        "text": "Ile godzin dzisiaj spałeś(-aś)?",
-        "type": "radio",
-        "options": ["4-5", "5-6", "7", "8", "9-10"]
-    },
-    {
-        "id": 2,
-        "text": "Jak wyglądał Twój poziom aktywności fizycznej dzisiaj?",
-        "type": "radio",
-        "options": ["brak", "lekka", "umiarkowana", "instensywna"]
-    },
-    {
-        "id":3,
-        "text": "W jaki sposób się dzisiaj odżywiałeś(-aś)",
-        "type": "radio",
-        "options": ["niezdrowo", "umiarkowanie niezdrowo", "umiarkowanie zdrowo", "zdrowo"]
-    },
-    {
-        "id": 4,
-        "text": "Jak często w ciągu dnia miałeś(-aś) interakcje z innymi ludźmi?",
-        "type": "radio",
-        "options": ["brak", "sporadycznie", "umiarkowanie", "instensywnie"]
-    },
-    {
-        "id": 5,
-        "text": "Ile miałeś dzisiaj czasu na relaks?",
-        "type": "radio",
-        "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
-    },
-    {
-        "id": 6,
-        "text": "Jak dużo czasu spędziłeś(aś) dzisiaj na świeżym powietrzu?",
-        "type": "radio",
-        "options": ["brak", "10-30 min", "30-60 min", "więcej niż 1h"]
-    },
-    {
-        "id": 7,
-        "text": "Ile czasu byłeś(-aś) dzisiaj poza domem?",
-        "type": "radio",
-        "options": ["brak", "mniej niż 1h", "1-8 h", "więcej niż 8 h"]
-    },
-    {
-        "id": 8,
-        "text": "Ile miałeś dzisiaj czasu na relaks?",
-        "type": "radio",
-        "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
-    },
-    {
-        "id": 9,
-        "text": "Ile posiłków dzisiaj jadłeś?",
-        "type": "radio",
-        "options": ["2", "3", "4", "5"]
-    },
-    {
-        "id": 10,
-        "text": "Jak oceniach twoje samopoczucie dzisiejszego dnia?",
-        "type": "radio",
-        "options": ["fatalne", "słabe", "dobre", "bardzo dobre"]
-    }
-]
 
 @bp.route('/survey')
 @login_required
 def survey():
     return render_template('survey.html')
 
+# Returns list of 10 questions
+# Returns 5 with highest rating to user
+# 2 wildcards
+# 1 question regarding how user feels
+# 2 global highest rank questions
 @bp.route('/api/questions')
 @login_required
 def get_questions():
-    return jsonify(QUESTIONS)
 
+    QUESTION_ABOUT_HUMOR_ID = 2
+
+    question_about_humor = [Question.query.filter_by(id = QUESTION_ABOUT_HUMOR_ID).first()]
+    excluded_ids = [QUESTION_ABOUT_HUMOR_ID]
+
+    top_five_question_ratings = (
+        QuestionRating.query
+        #.join(Question, QuestionRating.question_id == Question.id)
+        .filter(not_(Question.id.in_(excluded_ids)))
+        .filter_by(user_id = current_user.id)
+        .order_by(QuestionRating.rating.desc())
+        .limit(5)
+        .all()
+    )
+
+    top_five_questions = []
+
+    if len(top_five_question_ratings) == 5:
+        top_five_questions = Question.query.filter(
+        Question.id.in_([qr.id for qr in top_five_question_ratings])).all()
+
+    # If there's no rating yet - first survey - it returns 5 random questions instead of 2.
+    # After first survey questions will get rating
+    else:
+        top_five_questions = (
+            Question
+            .query.filter(not_(Question.id.in_(excluded_ids)))
+            .order_by(db.func.random())
+            .limit(5)
+            .all())
+
+    ids_to_exclude = [q.id for q in top_five_questions]
+    excluded_ids.extend(ids_to_exclude)
+
+    two_wildcards = (
+        Question.query
+        .filter(not_(Question.id.in_(excluded_ids)))
+        .order_by(db.func.random())
+        .limit(2)
+        .all()
+    )
+
+    ids_to_exclude = [q.id for q in two_wildcards]
+    excluded_ids.extend(ids_to_exclude)
+
+    global_two_questions = (
+        Question.query
+        .filter(not_(Question.id.in_(excluded_ids)))
+        .order_by(Question.global_rating.desc()).limit(2).all()
+    )
+
+    questions_to_return = top_five_questions + two_wildcards + global_two_questions + question_about_humor
+
+    return jsonify([{
+        'id': q.id,
+        'question_content': q.question_content,
+        'question_type': q.question_type,
+        'global_rating': q.global_rating,
+        #'choices': [c.answer_content for c in q.choices]
+        'choices': [
+        {
+            'id': c.id,
+            'answer_content': c.answer_content
+        } for c in q.choices]
+    } for q in questions_to_return])
+
+# TODO - change submit survey for the new model, post from frontend gives 500 response
 @bp.route('/api/submit-survey', methods=['POST'])
 @login_required
 def submit_survey():
     try:
         data = request.get_json()
+        user_id = current_user.id
+        choice_ids = list(choice['id'] for choice in data)
 
-        for question_id, answer in data.items():
-            new_answer = Answer(
-                user_id=current_user.id,
-                question_id=int(question_id.replace('q', '')),  # np. "q2" → 2
-                answer_text=str(answer)
-            )
-            db.session.add(new_answer)
+        choices = list(Choice.query.filter(Choice.id.in_(choice_ids)))
 
+        if len(choices) != len(choice_ids): #check if all ids found
+            found_ids = {c.id for c in choices}
+            missing_ids = [cid for cid in choice_ids if cid not in found_ids]
+            raise ValueError(f"Choices not found for IDs: {missing_ids}")
+
+
+        survey_to_save = Survey(owner_id = user_id, submission_date = date.today(), choices = choices)
+        db.session.add(survey_to_save)
         db.session.commit()
-        return jsonify({"success": True})
+        return jsonify({"success": True}), 200
 
     except Exception as e:
         db.session.rollback()
+        print(e)
         return jsonify({"success": False, "error": str(e)}), 500

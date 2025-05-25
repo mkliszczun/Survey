@@ -22,7 +22,7 @@ function renderQuestion(index) {
     const question = questions[index];
     const questionHTML = `
         <div class="question-card ${index === 0 ? 'active' : ''}">
-            <div class="question-text">${question.text}</div>
+            <div class="question-text">${question.question_content}</div>
             ${renderQuestionInput(question)}
         </div>
     `;
@@ -34,17 +34,17 @@ function renderQuestion(index) {
         activeQuestion.classList.add('active');
     });
 }
-
+// TODO tu może być problem, bo zwraca stringi, a nie obiekty, problem może pojawić się przy zapisie pytań
 function renderQuestionInput(question) {
-    if (question.type === 'radio') {
+    if (question.question_type === 'choice') {
         return `<div class="radio-group">${
-            question.options.map(opt => `
+            question.choices.map(choice => `
                 <label class="radio-option">
-                    <input type="radio" name="q${question.id}" value="${opt}">
-                    ${opt}
+                    <input type="radio" name="q${question.id}" value="${choice.id}">
+                    ${choice.answer_content}
                 </label>`
         ).join('')}</div>`;
-    }
+    } // TODO - if anyth. remove .id in this line and answer_content from here
     return `<textarea class="text-answer" name="q${question.id}"></textarea>`;
 }
 
@@ -94,10 +94,12 @@ function updateProgress() {
 
 async function submitSurvey() {
     try {
+        const formattedAnswers = Object.values(answers).map(id => ({id: parseInt(id)}));
+
         await fetch('/api/submit-survey', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(answers)
+            body: JSON.stringify(formattedAnswers)
         });
         window.location.href = '/dashboard';
     } catch (error) {

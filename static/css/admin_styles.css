@@ -203,3 +203,207 @@ h1 {
         padding: 10px 20px;
     }
 }
+
+/* Główne style */
+.admin-dashboard {
+    background: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-wrapper {
+    flex: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Nagłówek */
+.dashboard-header {
+    background: #2c3e50;
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-info {
+    text-align: right;
+}
+
+.admin-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Karty */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #2c3e50;
+}
+
+/* Przyciski */
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.dashboard-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #495057;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.dashboard-btn:hover {
+    background: #e9ecef;
+    color: #2c3e50;
+    transform: translateX(5px);
+}
+
+.dashboard-btn i {
+    width: 25px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* Badge */
+.notification-badge {
+    position: absolute;
+    right: 1rem;
+    background: #dc3545;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Stopka */
+.dashboard-footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .admin-info {
+        text-align: center;
+    }
+
+    .dashboard-grid {
+        padding: 0;
+    }
+}
+
+/* Loader */
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: none;
+    z-index: 1000;
+}
+
+.loader-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Toast messages */
+.error-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #dc3545;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Active link */
+.dashboard-btn.active {
+    background: var(--primary-color);
+    color: white !important;
+    border-left: 4px solid #2c3e50;
+}
