@@ -16,3 +16,19 @@
     justify-content: center;
     padding: 2rem;
 }
+
+/* Dodaj te style do istniejącego pliku */
+.question-table {
+    margin: 2rem auto;
+    max-width: 1400px;
+}
+
+.rating-progress .progress {
+    height: 25px;
+    border-radius: 4px;
+}
+
+.rating-progress .progress-bar {
+    font-size: 0.9rem;
+    font-weight: bold;
+}

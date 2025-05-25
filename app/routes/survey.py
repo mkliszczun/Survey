@@ -9,74 +9,10 @@ from ..extensions import db
 
 bp = Blueprint('survey', __name__)
 
-# QUESTIONS = [
-#     {
-#         "id": 1,
-#         "text": "Ile godzin dzisiaj spałeś(-aś)?",
-#         "type": "radio",
-#         "options": ["4-5", "5-6", "7", "8", "9-10"]
-#     },
-#     {
-#         "id": 2,
-#         "text": "Jak wyglądał Twój poziom aktywności fizycznej dzisiaj?",
-#         "type": "radio",
-#         "options": ["brak", "lekka", "umiarkowana", "instensywna"]
-#     },
-#     {
-#         "id":3,
-#         "text": "W jaki sposób się dzisiaj odżywiałeś(-aś)",
-#         "type": "radio",
-#         "options": ["niezdrowo", "umiarkowanie niezdrowo", "umiarkowanie zdrowo", "zdrowo"]
-#     },
-#     {
-#         "id": 4,
-#         "text": "Jak często w ciągu dnia miałeś(-aś) interakcje z innymi ludźmi?",
-#         "type": "radio",
-#         "options": ["brak", "sporadycznie", "umiarkowanie", "instensywnie"]
-#     },
-#     {
-#         "id": 5,
-#         "text": "Ile miałeś dzisiaj czasu na relaks?",
-#         "type": "radio",
-#         "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
-#     },
-#     {
-#         "id": 6,
-#         "text": "Jak dużo czasu spędziłeś(aś) dzisiaj na świeżym powietrzu?",
-#         "type": "radio",
-#         "options": ["brak", "10-30 min", "30-60 min", "więcej niż 1h"]
-#     },
-#     {
-#         "id": 7,
-#         "text": "Ile czasu byłeś(-aś) dzisiaj poza domem?",
-#         "type": "radio",
-#         "options": ["brak", "mniej niż 1h", "1-8 h", "więcej niż 8 h"]
-#     },
-#     {
-#         "id": 8,
-#         "text": "Ile miałeś dzisiaj czasu na relaks?",
-#         "type": "radio",
-#         "options": ["brak", "kilka/kilkanaście minut", "1-2 h", "więcej niż 2 h"]
-#     },
-#     {
-#         "id": 9,
-#         "text": "Ile posiłków dzisiaj jadłeś?",
-#         "type": "radio",
-#         "options": ["2", "3", "4", "5"]
-#     },
-#     {
-#         "id": 10,
-#         "text": "Jak oceniach twoje samopoczucie dzisiejszego dnia?",
-#         "type": "radio",
-#         "options": ["fatalne", "słabe", "dobre", "bardzo dobre"]
-#     }
-#]
-
 @bp.route('/survey')
 @login_required
 def survey():
     return render_template('survey.html')
-
 
 # Returns list of 10 questions
 # Returns 5 with highest rating to user
@@ -85,26 +21,43 @@ def survey():
 # 2 global highest rank questions
 @bp.route('/api/questions')
 @login_required
-def get_questions(): # TODO returns 4 questions for now
+def get_questions():
 
-    QUESTION_ABOUT_FEELING_ID = 1
+    QUESTION_ABOUT_HUMOR_ID = 2
 
-    all_questions = Question.query.all() # not Checked but should work
+    question_about_humor = [Question.query.filter_by(id = QUESTION_ABOUT_HUMOR_ID).first()]
+    excluded_ids = [QUESTION_ABOUT_HUMOR_ID]
 
-    #returns 6 questions since question about humour has always highest rating
-    top_five_question_ratings = ( # not checked
+    top_five_question_ratings = (
         QuestionRating.query
-        .filter_by(user_id = current_user.id) # not checked
+        #.join(Question, QuestionRating.question_id == Question.id)
+        .filter(not_(Question.id.in_(excluded_ids)))
+        .filter_by(user_id = current_user.id)
         .order_by(QuestionRating.rating.desc())
-        .limit(6)
+        .limit(5)
         .all()
     )
-    top_five_questions = Question.query.filter(
+
+    top_five_questions = []
+
+    if len(top_five_question_ratings) == 5:
+        top_five_questions = Question.query.filter(
         Question.id.in_([qr.id for qr in top_five_question_ratings])).all()
 
-    excluded_ids = [q.id for q in top_five_questions]
+    # If there's no rating yet - first survey - it returns 5 random questions instead of 2.
+    # After first survey questions will get rating
+    else:
+        top_five_questions = (
+            Question
+            .query.filter(not_(Question.id.in_(excluded_ids)))
+            .order_by(db.func.random())
+            .limit(5)
+            .all())
 
-    two_wildcards = (# not checked
+    ids_to_exclude = [q.id for q in top_five_questions]
+    excluded_ids.extend(ids_to_exclude)
+
+    two_wildcards = (
         Question.query
         .filter(not_(Question.id.in_(excluded_ids)))
         .order_by(db.func.random())
@@ -112,15 +65,16 @@ def get_questions(): # TODO returns 4 questions for now
         .all()
     )
 
+    ids_to_exclude = [q.id for q in two_wildcards]
+    excluded_ids.extend(ids_to_exclude)
+
     global_two_questions = (
         Question.query
+        .filter(not_(Question.id.in_(excluded_ids)))
         .order_by(Question.global_rating.desc()).limit(2).all()
     )
 
-    questions_to_return = top_five_questions + two_wildcards + global_two_questions
-
-    print(current_user.id)
-    print([q.id for q in questions_to_return])
+    questions_to_return = top_five_questions + two_wildcards + global_two_questions + question_about_humor
 
     return jsonify([{
         'id': q.id,

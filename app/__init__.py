@@ -22,12 +22,13 @@ def create_app(config_class=Config):
         return User.query.get(int(user_id))
 
     # Rejestracja blueprintów
-    from app.routes import auth, main, survey, admin, survey_list
+    from app.routes import auth, main, survey, admin, survey_list, question_list
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(survey.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(survey_list.bp)
+    app.register_blueprint(question_list.bp)
 
 
 
