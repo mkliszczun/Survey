@@ -1,5 +1,6 @@
 import pandas as pd
 from flask import Blueprint, jsonify, request
+from sqlalchemy.orm import joinedload
 
 from app import db
 from app.models import Choice, Question
@@ -7,14 +8,13 @@ from app.utils import admin_required
 
 bp = Blueprint ('rating', __name__, url_prefix='/admin')
 
-
 # TODO - add mood score to every survey to make the process faster
-@bp.route('/api/rating')
+@bp.route('/api/rating', methods = ['POST'])
 @admin_required
 def calculate_question_global_rating():
     question_id_to_calculate = request.get_json()['question_id']
 
-    question_choices = Choice.query.filter_by(question_id = question_id_to_calculate).all()
+    question_choices = Choice.query.options(joinedload(Choice.surveys)).filter_by(question_id = question_id_to_calculate).all()
 
     if not question_choices:
         return jsonify({'message': 'No choices found'}), 404
@@ -23,7 +23,7 @@ def calculate_question_global_rating():
 
     for choice in question_choices:
         #get all surveys where this choice occurs and from each survey choice for question with id 2
-        surveys = choice.surveys #might not be included because of lazy loading
+        surveys = choice.surveys #might not be included because of lazy loading TODO - is probably not included
         data_to_append = {
             'choice_id' : choice.id,
             'mood_score' : []

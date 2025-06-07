@@ -5,6 +5,8 @@ from app import create_app
 from app.config import TestConfig
 from app.models import db as _db
 from app.models import User
+from fixtures.question_fixtures import questions_without_ratings,questions_with_ratings
+from fixtures.survey_fixtures import survey_data_for_one_question_with_big_score_diff
 
 
 @pytest.fixture(scope='module') #creates app and initiates db. Done this way to avoid app context issues
@@ -41,3 +43,8 @@ def create_user_in_db(init_database):
 def login_user_for_test(client, user):
     with client.session_transaction():
         flask_login.login_user(user)
+    # with client.session_transaction() as sess:
+    #     sess['_user_id'] = str(user.id)
+    #     sess['_fresh'] = True
+    # with client:
+    #     flask_login.login_user(user)
