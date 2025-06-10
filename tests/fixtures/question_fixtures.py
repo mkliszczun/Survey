@@ -2,10 +2,6 @@ import pytest
 
 from app.models import Question, Choice, QuestionRating, db as _db
 
-
-# TODO add question with id 2 as a mock of mood question and jump to survey fixtures - done
-
-
 @pytest.fixture(scope='function')
 def questions_without_ratings(init_database):
     questions = [
@@ -20,6 +16,7 @@ def questions_without_ratings(init_database):
             ]
         ),
         Question(
+            id = 2,
             question_content="Mood question",
             question_type="choice",
             choices=[
