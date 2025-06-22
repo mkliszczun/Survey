@@ -16,7 +16,7 @@ def test_submit_survey(test_client, init_database, create_user_in_db):
     login_user_for_test(test_client, user)
 
     saved_survey = Survey.query.first()
-    assert saved_survey is None #check if db doesn't contain any other surveys - because it
+    assert saved_survey is None #checks if db doesn't contain any other surveys - because it
                                 # will take the first one
     data = [        # simulation of the data recived from frontend
         {"id": 2},
@@ -57,172 +57,175 @@ def test_submit_survey(test_client, init_database, create_user_in_db):
     Survey.query.delete()
     db.session.commit()
 
-def test_get_questions(test_client, init_database, create_user_in_db):
-    user = create_user_in_db('UserForTest', 'password123', email = 'testuseremail@mail.com', role = 'user')
+def test_get_questions(test_client, init_database, create_user_in_db, questions_with_ratings):
+    questions = questions_with_ratings['questions']
+    #user = create_user_in_db('UserForTest', 'password123', email = 'testuseremail@mail.com', role = 'user')
+    user = questions_with_ratings['user']
+    #TODO - fix this test - there might be problem with id's in fixture, but not sure.
     login_user_for_test(test_client, user)
 
-    questions = [
-        # 6 questions with high user rating
-        Question(
-            question_content="High user rating 1",
-            question_type="choice",
-            global_rating=0.70,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High user rating 2",
-            question_type="choice",
-            global_rating=0.65,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High user rating 3",
-            question_type="choice",
-            global_rating=0.61,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High user rating 4",
-            question_type="choice",
-            global_rating=0.65,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High user rating 5",
-            question_type="choice",
-            global_rating=0.65,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High user rating 6",
-            question_type="choice",
-            global_rating=0.65,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        # 2 pytania z globalnym rankingiem
-        Question(
-            question_content="High global rating 7",
-            question_type="choice",
-            global_rating=0.95,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="High global rating 8",
-            question_type="choice",
-            global_rating=0.90,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
+    # questions = [
+    #     # 6 questions with high user rating
+    #     Question(
+    #         question_content="High user rating 1",
+    #         question_type="choice",
+    #         global_rating=0.70,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High user rating 2",
+    #         question_type="choice",
+    #         global_rating=0.65,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High user rating 3",
+    #         question_type="choice",
+    #         global_rating=0.61,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High user rating 4",
+    #         question_type="choice",
+    #         global_rating=0.65,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High user rating 5",
+    #         question_type="choice",
+    #         global_rating=0.65,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High user rating 6",
+    #         question_type="choice",
+    #         global_rating=0.65,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     # 2 pytania z globalnym rankingiem
+    #     Question(
+    #         question_content="High global rating 7",
+    #         question_type="choice",
+    #         global_rating=0.95,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="High global rating 8",
+    #         question_type="choice",
+    #         global_rating=0.90,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #
+    #     # Wildcards
+    #     Question(
+    #         question_content="Wildcard 1",
+    #         question_type="choice",
+    #         global_rating=0.30,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="Wildcard 2",
+    #         question_type="choice",
+    #         global_rating=0.25,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="Wildcard 3",
+    #         question_type="choice",
+    #         global_rating=0.10,
+    #         choices=[
+    #             Choice(answer_content="A"),
+    #             Choice(answer_content="B"),
+    #             Choice(answer_content="C")
+    #         ]
+    #     ),
+    #     Question(
+    #         question_content="Wildcard 4",
+    #         question_type="text",
+    #         global_rating=0.05,
+    #         choices=[]
+    #     )
+    # ]
+    #
+    # db.session.bulk_save_objects(questions)
+    # db.session.flush()
+    # cur_user_id = user.id
 
-        # Wildcards
-        Question(
-            question_content="Wildcard 1",
-            question_type="choice",
-            global_rating=0.30,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="Wildcard 2",
-            question_type="choice",
-            global_rating=0.25,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="Wildcard 3",
-            question_type="choice",
-            global_rating=0.10,
-            choices=[
-                Choice(answer_content="A"),
-                Choice(answer_content="B"),
-                Choice(answer_content="C")
-            ]
-        ),
-        Question(
-            question_content="Wildcard 4",
-            question_type="text",
-            global_rating=0.05,
-            choices=[]
-        )
-    ]
-
-    db.session.bulk_save_objects(questions)
-    db.session.flush()
-    cur_user_id = user.id
-
-    ratings = [
-        QuestionRating(
-            question_id=1,
-            user_id=cur_user_id,
-            rating=0.88
-        ),
-        QuestionRating(
-            question_id=2,
-            user_id=cur_user_id,
-            rating=0.79
-        ),
-        QuestionRating(
-            question_id=3,
-            user_id=cur_user_id,
-            rating=0.91
-        ),
-        QuestionRating(
-            question_id=4,
-            user_id=cur_user_id,
-            rating=0.95
-        ),
-        QuestionRating(
-            question_id=5,
-            user_id=cur_user_id,
-            rating=0.92
-        ),
-        QuestionRating(
-            question_id=6,
-            user_id=cur_user_id,
-            rating=0.81
-        ),
-    ]
-
-    db.session.bulk_save_objects(ratings)
-    db.session.flush()
+    # ratings = [
+    #     QuestionRating(
+    #         question_id=1,
+    #         user_id=cur_user_id,
+    #         rating=0.88
+    #     ),
+    #     QuestionRating(
+    #         question_id=2,
+    #         user_id=cur_user_id,
+    #         rating=0.79
+    #     ),
+    #     QuestionRating(
+    #         question_id=3,
+    #         user_id=cur_user_id,
+    #         rating=0.91
+    #     ),
+    #     QuestionRating(
+    #         question_id=4,
+    #         user_id=cur_user_id,
+    #         rating=0.95
+    #     ),
+    #     QuestionRating(
+    #         question_id=5,
+    #         user_id=cur_user_id,
+    #         rating=0.92
+    #     ),
+    #     QuestionRating(
+    #         question_id=6,
+    #         user_id=cur_user_id,
+    #         rating=0.81
+    #     ),
+    # ]
+    #
+    # db.session.bulk_save_objects(ratings)
+    # db.session.flush()
 
     response = test_client.get('/api/questions')
 
@@ -245,10 +248,12 @@ def test_get_questions(test_client, init_database, create_user_in_db):
 
     assert data is not None
     assert len(questions_received) == 10
-    assert any(q.question_content == 'High user rating 1' for q in questions_received)
+    assert any(q.question_content == "High global rating 1" for q in questions_received)
+    assert any(q.question_content == "Mood question" for q in questions_received)
+    assert any(q.question_content == "High global rating 2" for q in questions_received)
+    assert any(q.question_content == "High user rating 1" for q in questions_received)
     assert any(q.question_content == 'High user rating 2' for q in questions_received)
     assert any(q.question_content == 'High user rating 3' for q in questions_received)
     assert any(q.question_content == 'High user rating 4' for q in questions_received)
-    #assert any(q.question_content == 'High user rating 5' for q in questions_received)
-    #assert any(q.question_content == 'High user rating 6' for q in questions_received)
+    assert any(q.question_content == 'High user rating 5' for q in questions_received)
     assert num_of_one_question == 1
