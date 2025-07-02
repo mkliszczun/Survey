@@ -2,10 +2,11 @@ import math
 
 import pandas as pd
 from flask import Blueprint, jsonify, request
+from flask_login import current_user
 from sqlalchemy.orm import joinedload
 
 from app import db
-from app.models import Choice, Question
+from app.models import Choice, Question, Survey
 from app.utils import admin_required
 
 bp = Blueprint ('rating', __name__, url_prefix='/admin')
@@ -60,3 +61,50 @@ def calculate_question_global_rating():
         db.session.commit()
 
     return jsonify({'success' : True, 'message' : 'global rating calculated', 'data' : global_rating}), 200
+
+
+
+@bp.route('/api/user_rating', methods = ['POST'])
+def user_rating():
+    user_id = current_user.id
+    question_id = request.get_json()['question_id']
+
+    user_rating = calculate_user_rating(user_id, question_id)
+
+    return jsonify({'success' : True, 'message' : 'user rating calculated', 'data' : user_rating}), 200
+
+def calculate_user_rating(user_id, question_id):
+    #get all the surveys owned by the user that contain answer to this question
+    surveys = Survey.query.filter(
+        Survey.owner_id == user_id,
+        Survey.choices.any(Choice.question_id == question_id)
+    ).all()
+
+    # from each survey get choice for that question and mood score
+    data = []
+    for survey in surveys:
+        data_to_append = {
+            'choice_id' : None,
+            'mood_score' : None
+        }
+        for choice in survey.choices:
+            if choice.question_id == question_id:
+                data_to_append['choice_id'] = choice.id
+            if choice.question_id == 2:
+                data_to_append['mood_score'] = int(choice.answer_content)
+        data.append(data_to_append)
+
+        #data looks like this: [{'choice_id' : 1, 'mood_score' : 6},{...}...]
+    df = pd.DataFrame(data)
+    # group by choice_id and calculate average mood score
+    df = df.groupby('choice_id')['mood_score'].mean().reset_index()
+    print(df)
+    # get the difference between max and min mood score
+    max_mood_score = df['mood_score'].max()
+    min_mood_score = df['mood_score'].min()
+    # return the difference as user rating
+    mood_score_dif = max_mood_score-min_mood_score
+
+    return mood_score_dif
+
+    pass

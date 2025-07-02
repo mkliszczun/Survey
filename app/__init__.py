@@ -10,7 +10,6 @@ def create_app(config_class=Config):
     app = Flask(__name__, template_folder='../templates', static_folder='../static' )
     app.config.from_object(config_class)
 
-    # Inicjalizacja rozszerzeń
     db.init_app(app)
     login_manager.init_app(app)
 
@@ -30,7 +29,5 @@ def create_app(config_class=Config):
     app.register_blueprint(survey_list.bp)
     app.register_blueprint(question_list.bp)
     app.register_blueprint(rating.bp)
-
-
 
     return app

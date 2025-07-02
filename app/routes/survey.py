@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import not_
 
+from .rating import calculate_user_rating
 from ..models import Answer, Question, QuestionRating, Survey, Choice
 from ..extensions import db
 
@@ -31,7 +32,7 @@ def get_questions():
     top_five_question_ratings = (
         QuestionRating.query
         #.join(Question, QuestionRating.question_id == Question.id)
-        .filter(not_(Question.id.in_(excluded_ids)))
+        .filter(~QuestionRating.question_id.in_(excluded_ids))
         .filter_by(user_id = current_user.id)
         .order_by(QuestionRating.rating.desc())
         .limit(5)
@@ -109,6 +110,15 @@ def submit_survey():
         survey_to_save = Survey(owner_id = user_id, submission_date = date.today(), choices = choices)
         db.session.add(survey_to_save)
         db.session.commit()
+
+        questions = Question.query.filter(Question.id.in_(choice_ids)).all()
+
+        for q in questions:
+            calculate_user_rating(current_user.id, q.id)
+
+        for q in questions:
+            calculate_global_rating(q.id)
+
         return jsonify({"success": True}), 200
 
     except Exception as e:

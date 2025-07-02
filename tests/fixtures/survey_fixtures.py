@@ -1,6 +1,6 @@
 import dateutil.utils
 import pytest
-from app.models import db as _db
+from app.models import db as _db, User
 
 from app.models import Survey
 
@@ -17,6 +17,12 @@ def find_mood_rating(mood_score, choices):
 @pytest.fixture
 def survey_data_for_one_question_with_big_score_diff(init_database, create_user_in_db, questions_without_ratings):
     data = questions_without_ratings
+
+    _db.session.query(User).delete()
+    _db.session.commit()
+
+    _db.session.expire_all()
+
     user = create_user_in_db(username= 'username', password = 'XXXXXXXX', email= "testmail@mail.com")
     question_to_fill_survey = None
 

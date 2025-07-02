@@ -1,11 +1,20 @@
 import pytest
+from sqlalchemy import delete
 
 from app.models import Question, Choice, QuestionRating, db as _db
 
-
-
 @pytest.fixture(scope='function')
 def questions_without_ratings(init_database):
+
+    #clean not to create conflict with id = 2
+    # _db.session.query(Choice).delete()
+    # _db.session.query(Question).delete()
+    _db.session.execute(delete(Choice))
+    _db.session.execute(delete(Question))
+    _db.session.commit()
+
+    _db.session.expire_all()
+
     questions = [
         # 6 questions with high user rating
         Question(
@@ -128,12 +137,23 @@ def questions_without_ratings(init_database):
     _db.session.add_all(questions)
     _db.session.commit()
 
-    return {
+    yield {
         'questions' : questions,
     }
 
+    _db.session.close()
+
 @pytest.fixture(scope='function')
 def questions_with_global_ratings(init_database):
+
+
+    #clean not to create conflict with id = 2
+    _db.session.query(Choice).delete()
+    _db.session.query(Question).delete()
+    _db.session.commit()
+
+    _db.session.expire_all()
+
     questions = [
         # 6 questions with high user rating
         Question(
@@ -254,6 +274,14 @@ def questions_with_global_ratings(init_database):
 
 @pytest.fixture(scope='function')
 def questions_with_ratings(questions_with_global_ratings, create_user_in_db):
+
+    _db.session.query(Choice).delete()
+    #_db.session.query(Question).delete()
+    _db.session.query(QuestionRating).delete()
+    _db.session.commit()
+
+    _db.session.expire_all()
+
     questions = questions_with_global_ratings
     high_user_rat_question_1 = next((q for q in questions if q.question_content == "High user rating 1"), None)
     high_user_rat_question_2 = next((q for q in questions if q.question_content == "High user rating 2"), None)
