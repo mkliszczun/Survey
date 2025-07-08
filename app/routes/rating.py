@@ -67,6 +67,7 @@ def calculate_question_global_rating(question_id_to_calculate):
 #TODO - make an ednpoint for global rating and refactor current endpoint for a method that will be called by endpoint
 
 @bp.route('/api/rating', methods = ['POST'])
+@admin_required
 def global_rating():
     question_id = request.get_json()['question_id']
     calculate_question_global_rating(question_id)
@@ -83,6 +84,7 @@ def global_rating():
 
 
 @bp.route('/api/user_rating', methods = ['POST'])
+@admin_required
 def user_rating():
     user_id = current_user.id
     question_id = request.get_json()['question_id']
