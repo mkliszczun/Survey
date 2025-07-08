@@ -20,7 +20,6 @@ def create_app(config_class=Config):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Rejestracja blueprintów
     from app.routes import auth, main, survey, admin, survey_list, question_list, rating
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)

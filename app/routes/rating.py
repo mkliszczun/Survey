@@ -12,15 +12,15 @@ from app.utils import admin_required
 bp = Blueprint ('rating', __name__, url_prefix='/admin')
 
 # TODO - add mood score to every survey to make the process faster
-@bp.route('/api/rating', methods = ['POST'])
-@admin_required
-def calculate_question_global_rating():
-    question_id_to_calculate = request.get_json()['question_id']
+#@bp.route('/api/rating', methods = ['POST'])
+#@admin_required
+def calculate_question_global_rating(question_id_to_calculate):
 
     question_choices = Choice.query.options(joinedload(Choice.surveys)).filter_by(question_id = question_id_to_calculate).all()
 
     if not question_choices:
-        return jsonify({'message': 'No choices found'}), 404
+        #return jsonify({'message': 'No choices found'}), 404
+         return None, 'No choices found'
 
     data = []
 
@@ -56,12 +56,30 @@ def calculate_question_global_rating():
 
     if question:
         if not isinstance(global_rating, (int, float)) or math.isnan(global_rating):
-            return jsonify({'success': False, 'message': 'global rating is not a valid number', 'global rating': global_rating}), 400
+            #return jsonify({'success': False, 'message': 'global rating is not a valid number', 'global rating': global_rating}), 400
+            return None, 'global rating is not a valid number'
         question.global_rating = global_rating
         db.session.commit()
 
-    return jsonify({'success' : True, 'message' : 'global rating calculated', 'data' : global_rating}), 200
+    #return jsonify({'success' : True, 'message' : 'global rating calculated', 'data' : global_rating}), 200
+    return global_rating, None
 
+#TODO - make an ednpoint for global rating and refactor current endpoint for a method that will be called by endpoint
+
+@bp.route('/api/rating', methods = ['POST'])
+def global_rating():
+    question_id = request.get_json()['question_id']
+    calculate_question_global_rating(question_id)
+
+    if question_id is None:
+        return jsonify({'success' : False,'message': 'No question id provided'}), 400
+
+    global_rating, error_message = calculate_question_global_rating(question_id)
+
+    if not global_rating:
+        return jsonify({'success' : False, 'message' : error_message}), 400
+
+    return jsonify({'success' : True, 'message' : 'global rating calculated', 'data' : global_rating}), 200
 
 
 @bp.route('/api/user_rating', methods = ['POST'])

@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 from sqlalchemy import not_
 
-from .rating import calculate_user_rating
+from .rating import calculate_user_rating, calculate_question_global_rating
 from ..models import Answer, Question, QuestionRating, Survey, Choice
 from ..extensions import db
 
@@ -116,8 +116,8 @@ def submit_survey():
         for q in questions:
             calculate_user_rating(current_user.id, q.id)
 
-        for q in questions:
-            calculate_global_rating(q.id)
+        #for q in questions:
+            #calculate_question_global_rating(q.id)
 
         return jsonify({"success": True}), 200
 
