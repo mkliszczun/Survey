@@ -114,10 +114,12 @@ def submit_survey():
         questions = Question.query.filter(Question.id.in_(choice_ids)).all()
 
         for q in questions:
-            calculate_user_rating(current_user.id, q.id)
+            if q.id != 2:
+               calculate_user_rating(current_user.id, q.id)
 
-        #for q in questions:
-            #calculate_question_global_rating(q.id)
+        for q in questions:
+            if q.id != 2:
+               calculate_question_global_rating(q.id)
 
         return jsonify({"success": True}), 200
 

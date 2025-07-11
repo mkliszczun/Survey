@@ -24,8 +24,6 @@ def get_all_questions():
             'choices' : [choice.answer_content for choice in question.choices]
         })
 
-    print(question_data)
-
     if question_data:
         return jsonify({'success' : True, 'data' : question_data}), 200
     else:

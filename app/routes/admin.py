@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from sqlalchemy import Nullable, inspect
 
 from ..extensions import db
-from app.models import Question, Choice
+from app.models import Question, Choice, QuestionRating
 from app.utils import admin_required
 
 
@@ -77,3 +77,31 @@ def add_question():
                 db.session.rollback()
                 print(e)
                 return jsonify({'success': False, 'message': 'something went wrong - question not added'}),500
+
+@bp.route('/delete_question', methods = ['DELETE'])
+@admin_required
+def delete_question():
+    question_to_delete_id = request.get_json()['question_id']
+
+    if question_to_delete_id is None:
+        return jsonify({'success' : False,'message': 'No question id provided'}), 400
+
+    question = Question.query.get(question_to_delete_id)
+
+    if question is None:
+        print('nie znaleziono pytania o id:')
+        print(question_to_delete_id)
+        return jsonify({'success' : False,'message': 'Question not found'}), 404
+
+    try:
+        Choice.query.filter_by(question_id=question_to_delete_id).delete()
+        QuestionRating.query.filter_by(question_id=question_to_delete_id).delete()
+
+        db.session.delete(question)
+        db.session.commit()
+        return jsonify({'success' : True,'message': 'Question removed'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return jsonify({'success' : False,'message': 'something went wrong - question not removed'}), 500

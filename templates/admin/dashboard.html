@@ -1,112 +1,61 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administracyjny</title>
-    
-    <!-- Style -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_styles.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Ikony (Font Awesome) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Reset specyficzny dla panelu admina */
-        .admin-dashboard * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-    </style>
-</head>
-<body class="admin-dashboard">
-    <div class="dashboard-wrapper">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <h1><i class="fa-solid fa-shield-halved"></i> Panel Administracyjny</h1>
-                <div class="admin-info">
-                    <span class="badge bg-primary">ADMIN</span>
-                    <p>Zalogowany jako: <strong>{{ current_user.username }}</strong></p>
-                </div>
-            </div>
-        </header>
+{% extends "layout.html" %}
 
-        <main class="dashboard-main">
-            <div class="dashboard-grid">
-                <!-- Sekcja Ankiety -->
-                <section class="dashboard-card">
-                    <h2><i class="fa-solid fa-clipboard-list"></i> Zarządzanie ankietami</h2>
-                    <div class="card-actions">
-                        <a href="/admin/survey_list" class="dashboard-btn">
-                            <i class="fa-solid fa-list"></i>
-                            Lista ankiet
-                            <span class="notification-badge">15</span>
-                        </a>
-                        <a href="/admin/create-survey" class="dashboard-btn">
-                            <i class="fa-solid fa-square-plus"></i>
-                            Nowa ankieta
-                        </a>
-                    </div>
-                </section>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 
-                <!-- Sekcja Pytania -->
-                <section class="dashboard-card">
-                    <h2><i class="fa-solid fa-circle-question"></i> Zarządzanie pytaniami</h2>
-                    <div class="card-actions">
-                        <a href="/admin/question_list" class="dashboard-btn">
-                            <i class="fa-solid fa-table-list"></i>
-                            Lista pytań
-                            <span class="notification-badge">42</span>
-                        </a>
-                        <a href="/admin/add-question" class="dashboard-btn">
-                            <i class="fa-solid fa-plus"></i>
-                            Dodaj pytanie
-                        </a>
-                    </div>
-                </section>
+<div class="dashboard-container animate-fade-in">
+    <h1 class="user-greeting">🛡️ Panel Administracyjny - Witaj {{ current_user.username }}</h1>
 
-                <!-- Sekcja Użytkownicy -->
-                <section class="dashboard-card">
-                    <h2><i class="fa-solid fa-users-gear"></i> Zarządzanie użytkownikami</h2>
-                    <div class="card-actions">
-                        <a href="/admin/users" class="dashboard-btn">
-                            <i class="fa-solid fa-user-group"></i>
-                            Lista użytkowników
-                            <span class="notification-badge">8</span>
-                        </a>
-                        <a href="/admin/add-user" class="dashboard-btn">
-                            <i class="fa-solid fa-user-plus"></i>
-                            Dodaj użytkownika
-                        </a>
-                    </div>
-                </section>
+    <div class="actions-grid">
 
-                <!-- Sekcja Statystyki -->
-                <section class="dashboard-card">
-                    <h2><i class="fa-solid fa-chart-simple"></i> Statystyki i raporty</h2>
-                    <div class="card-actions">
-                        <a href="/admin/stats" class="dashboard-btn">
-                            <i class="fa-solid fa-chart-column"></i>
-                            Statystyki systemowe
-                        </a>
-                        <a href="/admin/activity" class="dashboard-btn">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            Historia aktywności
-                        </a>
-                    </div>
-                </section>
-            </div>
-        </main>
+        <!-- Ankiety -->
+        <div class="action-card" onclick="window.location.href='/admin/survey_list'">
+            <h2>📋 Lista Ankiet</h2>
+            <p>Przeglądaj i zarządzaj ankietami</p>
+        </div>
+        <div class="action-card primary" onclick="window.location.href='/admin/create-survey'">
+            <h2>➕ Nowa Ankieta</h2>
+            <p>Utwórz nową ankietę</p>
+            <div class="btn-survey">Dodaj →</div>
+        </div>
 
-        <footer class="dashboard-footer">
-            <p>System zarządzania ankietami &copy; 2024</p>
-        </footer>
+        <!-- Pytania -->
+        <div class="action-card" onclick="window.location.href='/admin/question_list'">
+            <h2>❓ Lista Pytań</h2>
+            <p>Zarządzaj pytaniami w systemie</p>
+        </div>
+        <div class="action-card primary" onclick="window.location.href='/admin/add-question'">
+            <h2>➕ Dodaj Pytanie</h2>
+            <p>Stwórz nowe pytanie do ankiety</p>
+            <div class="btn-survey">Dodaj →</div>
+        </div>
+
+        <!-- Użytkownicy -->
+        <div class="action-card" onclick="window.location.href='/admin/users'">
+            <h2>👥 Użytkownicy</h2>
+            <p>Lista wszystkich zarejestrowanych użytkowników</p>
+        </div>
+        <div class="action-card primary" onclick="window.location.href='/admin/add-user'">
+            <h2>➕ Dodaj Użytkownika</h2>
+            <p>Dodaj nowego użytkownika do systemu</p>
+            <div class="btn-survey">Dodaj →</div>
+        </div>
+
+        <!-- Statystyki -->
+        <div class="action-card" onclick="window.location.href='/admin/stats'">
+            <h2>📊 Statystyki</h2>
+            <p>Przeglądaj statystyki systemowe</p>
+        </div>
+        <div class="action-card" onclick="window.location.href='/admin/activity'">
+            <h2>🕒 Historia Aktywności</h2>
+            <p>Zobacz działania użytkowników</p>
+        </div>
+
+        <!-- Powrót -->
+        <div class="action-card danger" onclick="window.location.href='/dashboard'">
+            <h2>🔙 Powrót do Dashboardu</h2>
+            <p>Wróć do głównego panelu użytkownika</p>
+        </div>
     </div>
-
-    <!-- Skrypty -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
