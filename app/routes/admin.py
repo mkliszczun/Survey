@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import Nullable, inspect
 
 from ..extensions import db
-from app.models import Question, Choice, QuestionRating
+from app.models import Question, Choice, QuestionRating, Survey
 from app.utils import admin_required
 
 
@@ -105,3 +105,26 @@ def delete_question():
         db.session.rollback()
         print(e)
         return jsonify({'success' : False,'message': 'something went wrong - question not removed'}), 500
+
+@bp.route('/delete_survey', methods = ['DELETE'])
+@admin_required
+def delete_survey():
+    survey_to_delete_id = request.get_json()['survey_id']
+
+    if survey_to_delete_id is None:
+        return jsonify({'success' : False,'message': 'No survey id provided'}), 400
+
+    survey_to_delete = Survey.query.get(survey_to_delete_id)
+
+    if survey_to_delete is None:
+        return jsonify({'success' : False, 'message': 'Survey not found'}), 404
+
+    try:
+        db.session.delete(survey_to_delete)
+        db.session.commit()
+        return jsonify({'success' : True, 'message': 'Survey removed'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return jsonify({'success' : False, 'message': 'something went wrong - survey not removed'}), 500

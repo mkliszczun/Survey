@@ -44,6 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${dateObj.toLocaleDateString()}</td>
                 <td>${survey.choices?.length || 0}</td>
                 <td>User #${survey.owner_id}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="confirmDeleteSurvey(${survey.id})">
+                        Usuń
+                    </button>
+                </td>
             `;
             tbody.appendChild(row);
         });
@@ -60,5 +65,31 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     };
 
+    window.confirmDeleteSurvey = function (surveyId) {
+        if (confirm("Czy na pewno chcesz usunąć tę ankietę?")) {
+            deleteSurvey(surveyId);
+        }
+    };
+
+        const deleteSurvey = async (id) => {
+        try {
+            const response = await fetch(`/admin/delete_survey`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ survey_id: id })
+            });
+
+            if (!response.ok) throw new Error("Nie udało się usunąć ankiety.");
+
+            loadSurveys(); // odśwież listę
+        } catch (err) {
+            alert("Błąd podczas usuwania ankiety: " + err.message);
+        }
+    };
+
     loadSurveys();
 });
+
