@@ -39,6 +39,11 @@
     color: white;
 }
 
+.action-card.stats{
+    background: linear-gradient(135deg, #6c5ce7 0%, #4b3dc9 100%);
+    color: white;
+}
+
 .action-card.danger {
     background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
     color: white;

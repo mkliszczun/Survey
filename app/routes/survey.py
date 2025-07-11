@@ -106,21 +106,32 @@ def submit_survey():
             missing_ids = [cid for cid in choice_ids if cid not in found_ids]
             raise ValueError(f"Choices not found for IDs: {missing_ids}")
 
+        print(choice_ids)
 
         survey_to_save = Survey(owner_id = user_id, submission_date = date.today(), choices = choices)
         db.session.add(survey_to_save)
         db.session.commit()
 
-        questions = Question.query.filter(Question.id.in_(choice_ids)).all()
+        question_ids = list(set([c.question_id for c in choices]))
+        questions = Question.query.filter(Question.id.in_(question_ids)).all()
+
+        #print size of questions
+        print(len(questions))
+        user_rat_num = 0
+        global_rat_num = 0
 
         for q in questions:
             if q.id != 2:
                calculate_user_rating(current_user.id, q.id)
+               user_rat_num += 1
 
         for q in questions:
             if q.id != 2:
                calculate_question_global_rating(q.id)
+               global_rat_num += 1
 
+        print('global ratings done x: ' + str(global_rat_num))
+        print('user ratings done x: ' + str(user_rat_num))
         return jsonify({"success": True}), 200
 
     except Exception as e:

@@ -6,7 +6,7 @@ from flask_login import current_user
 from sqlalchemy.orm import joinedload
 
 from app import db
-from app.models import Choice, Question, Survey
+from app.models import Choice, Question, Survey, QuestionRating
 from app.utils import admin_required
 
 bp = Blueprint ('rating', __name__, url_prefix='/admin')
@@ -86,14 +86,19 @@ def global_rating():
 @bp.route('/api/user_rating', methods = ['POST'])
 @admin_required
 def user_rating():
+    print('user rating endpoint called')
     user_id = current_user.id
     question_id = request.get_json()['question_id']
 
     user_rating = calculate_user_rating(user_id, question_id)
 
-    return jsonify({'success' : True, 'message' : 'user rating calculated', 'data' : user_rating}), 200
+    if user_rating is None:
+        return jsonify({'success' : False, 'message': 'No user rating calculated'}), 400
+    else:
+        return jsonify({'success' : True, 'message' : 'user rating calculated', 'data' : user_rating}), 200
 
 def calculate_user_rating(user_id, question_id):
+    print('calculate user rating method called')
     #get all the surveys owned by the user that contain answer to this question
     surveys = Survey.query.filter(
         Survey.owner_id == user_id,
@@ -118,12 +123,20 @@ def calculate_user_rating(user_id, question_id):
     df = pd.DataFrame(data)
     # group by choice_id and calculate average mood score
     df = df.groupby('choice_id')['mood_score'].mean().reset_index()
-    print(df)
     # get the difference between max and min mood score
     max_mood_score = df['mood_score'].max()
     min_mood_score = df['mood_score'].min()
     # return the difference as user rating
     mood_score_dif = max_mood_score-min_mood_score
+
+    try:
+        rating = QuestionRating(rating = mood_score_dif, user_id = user_id, question_id = question_id)
+        db.session.add(rating)
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
 
     return mood_score_dif
 

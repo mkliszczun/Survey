@@ -1,7 +1,7 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const loadQuestions = async () => {
         try {
-            const response = await fetch('/admin/api/question_list', {
+            const response = await fetch('/api/user_top_questions', {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const questions = await response.json();
             renderQuestions(questions.data);
-
         } catch (error) {
             console.error('Błąd ładowania danych:', error);
             showError(error.message);
@@ -27,6 +26,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = document.getElementById('question-list');
         tbody.innerHTML = '';
 
+        if (!questions.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        Brak pytań do wyświetlenia.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
         questions.forEach(question => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -34,27 +44,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${question.question_content}</td>
                 <td>${question.question_type.toUpperCase()}</td>
                 <td>
-                    <div class="rating-progress">
-                        <div class="progress">
-                            <div class="progress-bar
-                                ${getRatingColor(question.global_rating)}"
-                                role="progressbar"
-                                style="width: ${question.global_rating * 100}"
-                                aria-valuenow="${question.global_rating}"
-                                aria-valuemin="0"
-                                aria-valuemax="10">
-                                ${question.global_rating.toFixed(3)}
-                            </div>
+                    <div class="progress">
+                        <div class="progress-bar ${getRatingColor(question.global_rating)}"
+                             role="progressbar"
+                             style="width: ${(question.global_rating / 5 * 100).toFixed(1)}"
+                             aria-valuenow="${question.global_rating.toFixed(3)}"
+                             aria-valuemin="0" aria-valuemax="5">
+                             ${question.global_rating.toFixed(3)}
                         </div>
                     </div>
                 </td>
+                <td>${question.rating.toFixed(3)}</td>
                 <td>${question.choices.length}</td>
                 <td>${question.choices.join(', ')}</td>
-                <td>
-                <button class="btn btn-danger btn-sm" onclick="confirmDelete(${question.id})">
-                    Usuń
-                </button>
-            </td>
             `;
             tbody.appendChild(row);
         });
@@ -70,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = document.getElementById('question-list');
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-danger text-center">
+                <td colspan="7" class="text-danger text-center">
                     ${message}
                 </td>
             </tr>
@@ -79,29 +81,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     loadQuestions();
 });
-
-window.confirmDelete = function(questionId) {
-    if (confirm("Czy na pewno chcesz usunąć to pytanie?")) {
-        deleteQuestion(questionId);
-    }
-};
-
-const deleteQuestion = async (id) => {
-    try {
-        const response = await fetch(`/admin/delete_question`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({ question_id: id })
-        });
-
-        if (!response.ok) throw new Error("Nie udało się usunąć pytania.");
-
-        // refresh list after deleting
-        loadQuestions();
-    } catch (err) {
-        alert("Błąd podczas usuwania pytania: " + err.message);
-    }
-};

@@ -103,7 +103,7 @@ def test_admin_delete_question(test_client, init_database, questions_with_rating
     admin = create_user_in_db('admin4', 'password123', email="testadminmail4@mail.com", role='admin')
     login_user_for_test(test_client, admin)
 
-    response = test_client.delete('/admin/delete-question', json = {'question_id' : question_to_delete_id})
+    response = test_client.delete('/admin/delete_question', json = {'question_id' : question_to_delete_id})
 
     assert response.status_code == 200
     assert response.get_json()['message'] == 'Question removed'
