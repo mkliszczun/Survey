@@ -1,11 +1,14 @@
 from datetime import datetime
 from email.policy import default
-
 from sqlalchemy import nullsfirst
 from sqlalchemy.orm import backref
-
 from .database import db
 from flask_login import UserMixin
+
+survey_choices = db.Table('survey_choices',
+    db.Column('survey_id', db.Integer, db.ForeignKey('survey.id'), primary_key=True),
+    db.Column('choice_id', db.Integer, db.ForeignKey('choice.id'), primary_key=True)
+)
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -40,14 +43,17 @@ class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     answer_content = db.Column(db.String(50), nullable = False)
-    surveys = db.Column(db.Integer, db.ForeignKey('survey.id'))
+    #surveys = db.Column(db.Integer, db.ForeignKey('survey.id'))
+    surveys = db.relationship('Survey', secondary=survey_choices, back_populates='choices')
 
 class Survey(db.Model):
     __tablename__ = 'survey'
     id = db.Column(db.Integer, primary_key = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     submission_date = db.Column(db.Integer, nullable = False)
-    choices = db.relationship('Choice')
+    #choices = db.relationship('Choice')
+    choices = db.relationship('Choice', secondary=survey_choices, back_populates='surveys')
+
 
 class QuestionRating(db.Model):
     __tablename__ = 'question_rating'

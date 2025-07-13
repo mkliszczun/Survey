@@ -5,7 +5,7 @@ from flask import session
 
 from app import User
 from app.extensions import db
-from app.models import Question
+from app.models import Question, QuestionRating, Choice, Survey
 from tests.conftest import login_user_for_test, test_client
 
 
@@ -96,3 +96,28 @@ def test_admin_add_question_validation(test_client, init_database, create_user_i
 
     assert response.status_code == 400
     assert response.get_json()['message'] == 'question_content empty - question not added'
+
+def test_admin_delete_question(test_client, init_database, questions_with_ratings, create_user_in_db):
+
+    question_to_delete_id = 1
+    admin = create_user_in_db('admin4', 'password123', email="testadminmail4@mail.com", role='admin')
+    login_user_for_test(test_client, admin)
+
+    response = test_client.delete('/admin/delete_question', json = {'question_id' : question_to_delete_id})
+
+    assert response.status_code == 200
+    assert response.get_json()['message'] == 'Question removed'
+    assert Question.query.get(question_to_delete_id) is None
+    assert QuestionRating.query.filter_by(question_id = question_to_delete_id).first() is None
+    assert Choice.query.filter_by(question_id = question_to_delete_id).first() is None
+
+def test_admin_delete_survey(test_client, init_database, survey_data_for_one_question_with_big_score_diff, create_user_in_db):
+
+    survey_to_delete_id = 1
+    admin = create_user_in_db('admin5', 'password123', email="testadminmail5@mail.com", role='admin')
+    login_user_for_test(test_client, admin)
+
+    response = test_client.delete('/admin/delete_survey', json = {'survey_id' : survey_to_delete_id})
+    assert response.status_code == 200
+    assert response.get_json()['message'] == 'Survey removed'
+    assert Survey.query.get(survey_to_delete_id) is None
