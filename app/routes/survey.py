@@ -88,9 +88,8 @@ def get_questions():
             'id': c.id,
             'answer_content': c.answer_content
         } for c in q.choices]
-    } for q in questions_to_return])
+    } for q in questions_to_return]), 200
 
-# TODO - change submit survey for the new model, post from frontend gives 500 response
 @bp.route('/api/submit-survey', methods=['POST'])
 @login_required
 def submit_survey():
