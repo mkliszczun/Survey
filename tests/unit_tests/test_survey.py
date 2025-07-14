@@ -1,10 +1,7 @@
-from sqlalchemy import text
 from sqlalchemy.orm import joinedload
-from wtforms.validators import equal_to
 from app.models import Question, QuestionRating, Choice, Survey, User
 from tests.conftest import test_client, login_user_for_test, create_user_in_db
 from app.extensions import db
-from flask_login import current_user
 
 def test_get_questions_auth(test_client, init_database):
     response = test_client.get('/api/questions')

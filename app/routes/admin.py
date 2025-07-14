@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, session
-from sqlalchemy import Nullable, inspect
+from sqlalchemy import inspect
 
 from ..extensions import db
 from app.models import Question, Choice, QuestionRating, Survey

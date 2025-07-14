@@ -1,5 +1,4 @@
 from app.models import Survey, User, QuestionRating, Question
-from tests.fixtures.users_fixtures import login_user_for_test
 from tests.conftest import create_user_in_db
 
 def test_survey_flow(test_client, questions_without_ratings, init_database, create_user_in_db):
@@ -44,3 +43,7 @@ def test_survey_flow(test_client, questions_without_ratings, init_database, crea
 
     global_rating = Question.query.filter_by(id = 1).first().global_rating
     assert global_rating is not None
+
+    response = test_client.get('/survey')
+    assert response.status_code == 302
+    assert '/dashboard' in response.headers['Location']

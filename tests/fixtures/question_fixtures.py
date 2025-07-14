@@ -6,9 +6,7 @@ from app.models import Question, Choice, QuestionRating, db as _db
 @pytest.fixture(scope='function')
 def questions_without_ratings(init_database):
 
-    #clean not to create conflict with id = 2
-    # _db.session.query(Choice).delete()
-    # _db.session.query(Question).delete()
+
     _db.session.execute(delete(Choice))
     _db.session.execute(delete(Question))
     _db.session.commit()
@@ -276,7 +274,6 @@ def questions_with_global_ratings(init_database):
 def questions_with_ratings(questions_with_global_ratings, create_user_in_db):
 
     _db.session.query(Choice).delete()
-    #_db.session.query(Question).delete()
     _db.session.query(QuestionRating).delete()
     _db.session.commit()
 

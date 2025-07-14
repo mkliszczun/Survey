@@ -19,7 +19,6 @@ def calculate_question_global_rating(question_id_to_calculate):
     question_choices = Choice.query.options(joinedload(Choice.surveys)).filter_by(question_id = question_id_to_calculate).all()
 
     if not question_choices:
-        #return jsonify({'message': 'No choices found'}), 404
          return None, 'No choices found'
 
     data = []
@@ -61,7 +60,6 @@ def calculate_question_global_rating(question_id_to_calculate):
         question.global_rating = global_rating
         db.session.commit()
 
-    #return jsonify({'success' : True, 'message' : 'global rating calculated', 'data' : global_rating}), 200
     return global_rating, None
 
 #TODO - make an ednpoint for global rating and refactor current endpoint for a method that will be called by endpoint

@@ -43,7 +43,6 @@ class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     answer_content = db.Column(db.String(50), nullable = False)
-    #surveys = db.Column(db.Integer, db.ForeignKey('survey.id'))
     surveys = db.relationship('Survey', secondary=survey_choices, back_populates='choices')
 
 class Survey(db.Model):
@@ -51,7 +50,6 @@ class Survey(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     submission_date = db.Column(db.Integer, nullable = False)
-    #choices = db.relationship('Choice')
     choices = db.relationship('Choice', secondary=survey_choices, back_populates='surveys')
 
 

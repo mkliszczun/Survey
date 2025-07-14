@@ -1,4 +1,3 @@
-from app import User
 from app.routes.rating import calculate_user_rating
 from tests.conftest import test_client, login_user_for_test, create_user_in_db
 

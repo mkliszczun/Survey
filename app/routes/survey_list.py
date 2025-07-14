@@ -10,7 +10,6 @@ bp = Blueprint ('survey_list', __name__, url_prefix='/admin')
 @bp.route('/survey_list')
 @admin_required
 def survey_list():
-
     return render_template('admin/survey-list.html'), 200
 
 @bp.route('/api/survey_list')

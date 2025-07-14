@@ -1,10 +1,3 @@
-from difflib import restore
-from http.client import responses
-
-from flask import session
-
-from app import User
-from app.extensions import db
 from app.models import Question, QuestionRating, Choice, Survey
 from tests.conftest import login_user_for_test, test_client
 

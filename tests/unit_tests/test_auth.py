@@ -1,6 +1,4 @@
-import pytest
 from app.models import User
-from werkzeug.security import check_password_hash
 
 def test_user_registration(test_client, init_database): #test registering method
     response = test_client.post("/api/register", json = {

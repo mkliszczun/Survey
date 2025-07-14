@@ -25,27 +25,3 @@ def init_database(test_client):
     yield
     _db.session.rollback()
     _db.session.remove()
-
-# @pytest.fixture(scope='function')
-# def create_user_in_db(init_database):
-#
-#     created_users = []
-#     def _create_user(username, password, email, role='user'):
-#         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-#         user = User(username=username, password=hashed_password, email = email, role=role)
-#         _db.session.add(user)
-#         _db.session.commit()
-#         created_users.append(user)
-#         return user
-#
-#     yield _create_user
-#
-# def login_user_for_test(client, user):
-#     with client.session_transaction():
-#         flask_login.login_user(user)
-        #--------
-    # with client.session_transaction() as sess:
-    #     sess['_user_id'] = str(user.id)
-    #     sess['_fresh'] = True
-    # with client:
-    #     flask_login.login_user(user)
